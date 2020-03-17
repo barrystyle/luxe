@@ -536,13 +536,7 @@ bool CBlockTreeDB::LoadBlockIndexGuts()
                 pindexNew->hashProofOfStake = diskindex.hashProofOfStake;
 
                 bool isPoW = (diskindex.nNonce != 0) && pindexNew->nHeight <= Params().LAST_POW_BLOCK();
-                if (isPoW) {
-                    auto const &hash(pindexNew->GetBlockHash());
-                    if (!CheckProofOfWork(hash, pindexNew->nBits, Params().GetConsensus())) {
-                        unsigned int nBits = pindexPrev ? pindexPrev->nBits : 0;
-                        return error("%s: CheckProofOfWork failed: %d %s (%d, %d)", __func__, pindexNew->nHeight, hash.GetHex(), pindexNew->nBits, nBits);
-                    }
-                } else {
+                if (!isPoW) {
                     stake->MarkStake(pindexNew->prevoutStake, pindexNew->nStakeTime);
                     auto const &hash(pindexNew->GetBlockHash());
                     uint256 proof;

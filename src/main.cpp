@@ -4461,12 +4461,12 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     if (fCheckMerkleRoot) {
         bool mutated;
 
-        LogPrintf("\nblock was %s\n", block.ToString().c_str());
+        //! LogPrintf("\nblock was %s\n", block.ToString().c_str());
 
         uint256 hashMerkleRoot2 = BlockMerkleRoot(block, &mutated);
 
-        LogPrintf("block.hashMerkleRoot = %s\n", block.hashMerkleRoot.ToString().c_str());
-        LogPrintf("hashMerkleRoot2      = %s\n", hashMerkleRoot2.ToString().c_str());
+        //! LogPrintf("block.hashMerkleRoot = %s\n", block.hashMerkleRoot.ToString().c_str());
+        //! LogPrintf("hashMerkleRoot2      = %s\n", hashMerkleRoot2.ToString().c_str());
 
         if (block.hashMerkleRoot != hashMerkleRoot2)
             return state.DoS(100, false, REJECT_INVALID, "bad-txnmrklroot", true, "hashMerkleRoot mismatch");

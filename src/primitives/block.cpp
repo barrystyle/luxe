@@ -25,16 +25,13 @@ uint256 CBlockHeader::GetHash(int nHeight, bool fBlockIndexHash) const
     const int nSwitchPhi2Block = Params().SwitchPhi2Block();
     const int nSwitchRandomXBlock = Params().SwitchRandomXBlock();
 
-    //! dont use randomx for blockindex hash
-    if (!fBlockIndexHash && (nHeight >= nSwitchRandomXBlock) && (nVersion & (1 << 30))) {
+    if (nHeight >= nSwitchRandomXBlock && (nVersion & (1 << 30))) {
       //! LogPrintf("\nalgo: randomx (144) height %d\n", nHeight);
-      //seedHash(seed, seedHex, nHeight);
       seedNow(nHeight);
       return randomx_hash(BEGIN(nVersion), END(hashUTXORoot));
     }
-    else if (!fBlockIndexHash && (nHeight >= nSwitchRandomXBlock)) {
+    else if (nHeight >= nSwitchRandomXBlock) {
       //! LogPrintf("\nalgo: randomx (80) height %d\n", nHeight);
-      //seedHash(seed, seedHex, nHeight);
       seedNow(nHeight);
       return randomx_hash(BEGIN(nVersion), END(nNonce));
     }
