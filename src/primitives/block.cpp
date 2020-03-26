@@ -5,6 +5,7 @@
 
 #include "primitives/block.h"
 
+#include "rxmonero/hash-ops.h"
 #include "hash.h"
 #include "randomx.h"
 #include "script/standard.h"
@@ -25,15 +26,20 @@ uint256 CBlockHeader::GetHash(int nHeight, bool fBlockIndexHash) const
     const int nSwitchPhi2Block = Params().SwitchPhi2Block();
     const int nSwitchRandomXBlock = Params().SwitchRandomXBlock();
 
+    uint256 thash;
+    uint256 seed_hash = uint256();
+    static unsigned miners = 1;
+    uint64_t seed_height = rx_seedheight(nHeight);
+
     if (nHeight >= nSwitchRandomXBlock && (nVersion & (1 << 30))) {
-      //! LogPrintf("\nalgo: randomx (144) height %d\n", nHeight);
-      seedNow(nHeight);
-      return randomx_hash(BEGIN(nVersion), END(hashUTXORoot));
+        //! LogPrintf("\nalgo: randomx (144) height %d\n", nHeight);
+        rx_slow_hash(nHeight, seed_height, (const char*)&seed_hash, this, 144, (char*)&thash, miners, 0);
+        return thash;
     }
     else if (nHeight >= nSwitchRandomXBlock) {
-      //! LogPrintf("\nalgo: randomx (80) height %d\n", nHeight);
-      seedNow(nHeight);
-      return randomx_hash(BEGIN(nVersion), END(nNonce));
+        //! LogPrintf("\nalgo: randomx (80) height %d\n", nHeight);
+        rx_slow_hash(nHeight, seed_height, (const char*)&seed_hash, this, 80, (char*)&thash, miners, 0);
+        return thash;
     }
     else if (nHeight >= nSwitchPhi2Block && (nVersion & (1 << 30))) {
         //! LogPrintf("\nalgo: phi2 (144) height %d\n", nHeight);
