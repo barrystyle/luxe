@@ -21,6 +21,21 @@ uint256 CBlockHeader::GetGenesisHash() const
     return Phi1612(BEGIN(nVersion), END(nNonce));
 }
 
+void CBlockHeader::getShortHeader(char& header) const
+{
+    char *r = (char*)malloc(80);
+    const char *p = reinterpret_cast<const char*>(this);
+    memcpy((r+0),(p+4),16);    //! low16-prevhash
+    memcpy((r+16),(p+36),16);  //! low16-merklert
+    memcpy((r+32),(p+68),4);   //! full4-ntime
+    memcpy((r+36),(p+72),4);   //! full4-nbits
+    memcpy((r+40),(p+76),4);   //! full4-nonce
+    memcpy((r+44),(p+80),18);  //! low18-utxoroot
+    memcpy((r+62),(p+112),18); //! low18-utxostate
+    memcpy((char*)&header,r,80);
+    free(r);
+}
+
 uint256 CBlockHeader::GetHash(int nHeight, bool fBlockIndexHash) const
 {
     const int nSwitchPhi2Block = Params().SwitchPhi2Block();
@@ -32,8 +47,11 @@ uint256 CBlockHeader::GetHash(int nHeight, bool fBlockIndexHash) const
     uint64_t seed_height = rx_seedheight(nHeight);
 
     if (nHeight >= nSwitchRandomXBlock && (nVersion & (1 << 30))) {
-        //! LogPrintf("\nalgo: randomx (144) height %d\n", nHeight);
-        rx_slow_hash(nHeight, seed_height, (const char*)&seed_hash, this, 144, (char*)&thash, miners, 0);
+        //! LogPrintf("\nalgo: randomx (144->80) height %d\n", nHeight);
+        char *r = (char*)malloc(80);
+        this->getShortHeader(*r);
+        rx_slow_hash(nHeight, seed_height, (const char*)&seed_hash, r, 80, (char*)&thash, miners, 0);
+        free(r);
         return thash;
     }
     else if (nHeight >= nSwitchRandomXBlock) {

@@ -78,6 +78,7 @@ public:
         return (nBits == 0);
     }
 
+    void getShortHeader(char& header) const;
     uint256 GetHash(int nHeight = 0, bool fBlockIndexHash = false) const;
     uint256 GetGenesisHash() const;
 
