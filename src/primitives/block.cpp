@@ -36,6 +36,22 @@ void CBlockHeader::getShortHeader(char& header) const
     free(r);
 }
 
+void CBlockHeader::getShortShaHeader(char& header) const
+{
+    char *r = (char*)malloc(80);
+    char *m = (char*)malloc(96);
+    const char *p = reinterpret_cast<const char*>(this);
+    memcpy((r),(p),80);        //! std 80b bitcoin
+    memcpy((m),(p+36),32);     //! merkleroot
+    memcpy((m+32),(p+80),32);  //! utxoroot
+    memcpy((m+64),(p+112),32); //! utxostate
+    SHA256((const unsigned char*)m,
+           96,(unsigned char*)(r+36)); //! 96->32 sha256 into merkleroot
+    memcpy((char*)&header,r,80);
+    free(r);
+    free(m);
+}
+
 uint256 CBlockHeader::GetHash(int nHeight, bool fBlockIndexHash) const
 {
     const int nSwitchPhi2Block = Params().SwitchPhi2Block();
